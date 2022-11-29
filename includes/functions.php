@@ -65,19 +65,19 @@ function genCSV(int $recordsCount){
 
         for ($i=0; $i < $recordsCount; $i++) {
 
+            $insert = false;
+
             $newUser = genCsvUser($names, $surnames, $id);
 
-            if(checkArr($userValidate, $newUser) == false) {
+            while(checkArr($userValidate, $newUser) == false) {
 
-                $insert = false;
                 $newUser = genCsvUser($names, $surnames, $id);
                 
             }
-            else{
-                $insert = true;
-            }
-            
+
             $insert = true;
+
+            $newUser['token'] = json_encode($newUser);
 
             if($insert && !empty($newUser)){
                 
@@ -111,7 +111,8 @@ function genCSV(int $recordsCount){
 
 function checkArr($userValidate, $newUser){
 
-    $userSting = implode($newUser);
+    //$userSting = implode($newUser);
+    $userSting = json_encode($newUser);
 
     if(!in_array($userSting, $userValidate)){
         $userValidate[] = $userSting;
@@ -310,8 +311,9 @@ function importCSV($csvSelect){
                     }
 
                     $row++;
-                   
+                    
                 }
+
                 foreach (array_chunk($insertArr, 10000) as $insertChunk) {
                     $mysqli->query("INSERT INTO csv_import (name, surname, initials, age, dob) VALUES ".implode(',', $insertChunk)) or ( throw new Exception("Error Processing Request: ".$mysqli->error));
                 }
