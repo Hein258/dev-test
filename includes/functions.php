@@ -49,19 +49,11 @@ function genCSV(int $recordsCount){
     ];
 
     $usersArr = [];
-    $userValidate = [];
 
     $id = 1;
     $records = 0;
 
     try {
-
-        if(!is_dir('output')) {
-            mkdir('output', 0777);
-        }
-
-        $fp = fopen('output/output.csv', 'w');
-        fputcsv($fp, ['id', 'Name', 'Surname', 'Initials', 'Age', 'Date Of Birth']);
 
         for ($i=0; $i < $recordsCount; $i++) {
 
@@ -69,7 +61,7 @@ function genCSV(int $recordsCount){
 
             $newUser = genCsvUser($names, $surnames, $id);
 
-            while(checkArr($userValidate, $newUser) == false) {
+            while(checkArr($usersArr, $newUser) == false) {
 
                 $newUser = genCsvUser($names, $surnames, $id);
                 
@@ -78,9 +70,9 @@ function genCSV(int $recordsCount){
             $insert = true;
 
             if($insert && !empty($newUser)){
-                
-                $usersArr[] = $newUser;
-                fputcsv($fp, $newUser);
+
+                $token = getToken($newUser);
+                $usersArr[$token] = $newUser;
 
                 $id++;
                 $records++;
@@ -88,6 +80,18 @@ function genCSV(int $recordsCount){
             }
         }
 
+        if(!is_dir('output')) {
+            mkdir('output', 0777);
+        }
+
+        $fp = fopen('output/output.csv', 'w');
+
+        fputcsv($fp, ['id', 'Name', 'Surname', 'Initials', 'Age', 'Date Of Birth']);
+
+        foreach($usersArr as $user){
+            fputcsv($fp, $user);
+        }
+        
         fclose($fp);
 
         $_SESSION['message'] = array(
@@ -107,18 +111,25 @@ function genCSV(int $recordsCount){
 
 }
 
-function checkArr($userValidate, $newUser){
+function checkArr($usersArr, $newUser){
 
-    $userSting = implode($newUser);
-    //$userSting = json_encode($newUser);
+    $token = getToken($newUser);
 
-    if(!in_array($userSting, $userValidate)){
-        $userValidate[] = $userSting;
+    if(!isset($usersArr[$token])){
         return true;
     }
     else{
         return false;
     }
+
+}
+
+function getToken($newUser){
+
+    unset($newUser['id']);
+    $token = strtolower(str_replace('/', '',implode($newUser)));
+
+    return $token;
 
 }
 
