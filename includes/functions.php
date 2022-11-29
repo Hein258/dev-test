@@ -77,8 +77,6 @@ function genCSV(int $recordsCount){
 
             $insert = true;
 
-            $newUser['token'] = json_encode($newUser);
-
             if($insert && !empty($newUser)){
                 
                 $usersArr[] = $newUser;
@@ -111,8 +109,8 @@ function genCSV(int $recordsCount){
 
 function checkArr($userValidate, $newUser){
 
-    //$userSting = implode($newUser);
-    $userSting = json_encode($newUser);
+    $userSting = implode($newUser);
+    //$userSting = json_encode($newUser);
 
     if(!in_array($userSting, $userValidate)){
         $userValidate[] = $userSting;
@@ -311,7 +309,7 @@ function importCSV($csvSelect){
                     }
 
                     $row++;
-                    
+
                 }
 
                 foreach (array_chunk($insertArr, 10000) as $insertChunk) {
